@@ -1,6 +1,11 @@
 Rails.application.routes.draw do
+  devise_for :users
   use_doorkeeper
-  resources :posts
+  resources :posts do 
+    collection do 
+      get :get_posts
+    end
+  end
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

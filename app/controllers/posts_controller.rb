@@ -1,10 +1,16 @@
 class PostsController < ApplicationController
+  load_and_authorize_resource
+  skip_load_and_authorize_resource only: :get_posts
+  before_action :doorkeeper_authorize!, only: [:get_posts]
   before_action :set_post, only: [:show, :edit, :update, :destroy]
 
   # GET /posts
   # GET /posts.json
   def index
-    @posts = Post.all
+  end
+
+  def get_posts
+    render json: Post.where(user_id: doorkeeper_token.resource_owner_id)
   end
 
   # GET /posts/1
@@ -24,7 +30,7 @@ class PostsController < ApplicationController
   # POST /posts
   # POST /posts.json
   def create
-    @post = Post.new(post_params)
+    @post = current_user.posts.build(post_params)
 
     respond_to do |format|
       if @post.save
@@ -62,13 +68,13 @@ class PostsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_post
-      @post = Post.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_post
+    @post = Post.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def post_params
-      params.require(:post).permit(:body, :title)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def post_params
+    params.require(:post).permit!
+  end
 end
