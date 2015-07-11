@@ -1,12 +1,18 @@
 class PostsController < ApplicationController
   load_and_authorize_resource
-  skip_load_and_authorize_resource only: :get_posts
+  skip_load_and_authorize_resource only: [:get_posts, :me]
   before_action :doorkeeper_authorize!, only: [:get_posts]
   before_action :set_post, only: [:show, :edit, :update, :destroy]
-
+  respond_to :json, :html
   # GET /posts
   # GET /posts.json
   def index
+  end
+
+  def me
+    if doorkeeper_token
+      respond_with User.find(doorkeeper_token.resource_owner_id)
+    end
   end
 
   def get_posts
